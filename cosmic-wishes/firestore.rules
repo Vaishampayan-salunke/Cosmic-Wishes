@@ -14,7 +14,7 @@ service cloud.firestore {
         && request.resource.data.ownerUid == uid()
         && request.resource.data.cat in ['love','dreams','career','health','travel','friendship','other']
         && request.resource.data.kind in ['public','sealed']
-        && request.resource.data.name is string && request.resource.data.name.size() <= 80
+        && request.resource.data.name == ''   // public stars are anonymous: the author's name is never stored here
         && request.resource.data.forName is string && request.resource.data.forName.size() <= 80
         && request.resource.data.preview is string && request.resource.data.preview.size() <= 200
         && request.resource.data.granted == false && request.resource.data.removed == false
@@ -78,7 +78,7 @@ service cloud.firestore {
     match /constellations/{id} {
       allow read: if true;
       allow create: if signedIn()
-        && request.resource.data.keys().hasOnly(['a','b','name','ownerUid','ownerName','createdAt','updatedAt'])
+        && request.resource.data.keys().hasOnly(['a','b','name','ownerUid','createdAt','updatedAt'])
         && request.resource.data.ownerUid == uid()
         && request.resource.data.a is string && request.resource.data.b is string
         && request.resource.data.a != request.resource.data.b

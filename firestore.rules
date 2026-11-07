@@ -1,0 +1,114 @@
+rules_version = '2';
+// Paste this whole file into: Firebase console → Firestore Database → Rules → Publish.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+
+    // ── Star stubs: public sky. Never contain the private text of a sealed wish. ──
+    match /stars/{id} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['ownerUid','name','forName','cat','x','y','size','kind','preview','unlockAt','granted','removed','createdAt','updatedAt'])
+        && request.resource.data.ownerUid == uid()
+        && request.resource.data.cat in ['love','dreams','career','health','travel','friendship','other']
+        && request.resource.data.kind in ['public','sealed']
+        && request.resource.data.name == ''   // public stars are anonymous: the author's name is never stored here
+        && request.resource.data.forName is string && request.resource.data.forName.size() <= 80
+        && request.resource.data.preview is string && request.resource.data.preview.size() <= 200
+        && request.resource.data.granted == false && request.resource.data.removed == false
+        && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time;
+      // owners may only toggle "granted", soft-delete, and blank the preview
+      allow update: if signedIn() && resource.data.ownerUid == uid()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['granted','removed','preview','updatedAt'])
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    // ── Full text of PUBLIC wishes (fetched only when a star is opened) ──
+    match /texts/{id} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.ownerUid == uid()
+        && request.resource.data.text is string && request.resource.data.text.size() < 900000;
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.ownerUid == uid();
+    }
+
+    // ── SEALED wishes. The document id is an unguessable secret code = the private link. ──
+    // Anyone holding the code can read it (get). Nobody can list/browse them except the owner.
+    // Time-capsules are enforced here, server-side, with request.time.
+    match /sealed/{code} {
+      allow get: if resource == null
+        || resource.data.unlockAt == null
+        || resource.data.unlockAt <= request.time
+        || (signedIn() && resource.data.ownerUid == uid());
+      allow list: if signedIn() && resource.data.ownerUid == uid();
+      allow create: if signedIn() && code.size() >= 16
+        && request.resource.data.ownerUid == uid()
+        && request.resource.data.text is string && request.resource.data.text.size() < 900000;
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.ownerUid == uid();
+    }
+
+    // ── Twinkles (support). One per user per star, count only ever goes up by 1. ──
+    match /boosts/{starId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['count','updatedAt'])
+        && request.resource.data.count == 1
+        && request.resource.data.updatedAt == request.time
+        && existsAfter(/databases/$(database)/documents/boosts/$(starId)/by/$(request.auth.uid));
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['count','updatedAt'])
+        && request.resource.data.count == resource.data.count + 1
+        && request.resource.data.updatedAt == request.time
+        && !exists(/databases/$(database)/documents/boosts/$(starId)/by/$(request.auth.uid))
+        && existsAfter(/databases/$(database)/documents/boosts/$(starId)/by/$(request.auth.uid));
+      allow delete: if false;
+
+      match /by/{userId} {
+        allow read: if signedIn() && userId == uid();
+        allow create: if signedIn() && userId == uid();
+        allow update, delete: if false;
+      }
+    }
+
+    // ── Constellations: public lines between two stars ──
+    match /constellations/{id} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['a','b','name','ownerUid','createdAt','updatedAt'])
+        && request.resource.data.ownerUid == uid()
+        && request.resource.data.a is string && request.resource.data.b is string
+        && request.resource.data.a != request.resource.data.b
+        && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time;
+      allow update, delete: if false;
+    }
+
+    // ── Private replies + "your wish was opened" notifications. Only sender and receiver can read. ──
+    match /inbox/{id} {
+      allow read: if signedIn() && (resource.data.toUid == uid() || resource.data.fromUid == uid());
+      allow create: if signedIn() && request.resource.data.fromUid == uid()
+        && request.resource.data.type in ['reply','opened']
+        && request.resource.data.read == false
+        && request.resource.data.text is string && request.resource.data.text.size() < 900000;
+      allow update: if signedIn() && resource.data.toUid == uid()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow delete: if false;
+    }
+
+    // ── Wishes a friend sent me (so they show up in my profile) ──
+    match /received/{id} {
+      allow read, delete: if signedIn() && resource.data.uid == uid();
+      allow create: if signedIn() && request.resource.data.uid == uid();
+      allow update: if false;
+    }
+
+    // ── Reports: write-only (you read them in the Firebase console) ──
+    match /reports/{id} {
+      allow create: if signedIn();
+      allow read, update, delete: if false;
+    }
+  }
+}

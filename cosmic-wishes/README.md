@@ -5,13 +5,15 @@ with **Firebase** (free Spark plan) for accounts + database and **Vercel** (free
 
 ## What's inside
 
+> **Every public wish is anonymous** — the starter wishes and everyone's real public wishes show as *Anonymous*, and the author's name is never stored on a public star. Only the author sees *You* and can find their own star again (**Profile → View in sky**, or Search → **My stars only**). A **private** wish sent to a friend shows your account name (set in Profile → Me) only to the friend who opens your link.
+
 | Feature | How it works |
 |---|---|
 | Landing + animated sky | Full-screen canvas: nebula, parallax stars, distant galaxies, **Sun**, phase-changing **Moon**, small **Black hole** (no wish is ever placed near them) |
 | Pannable / zoomable sky | Drag, scroll-wheel, pinch, `+` `-` keys, zoom buttons, **Universe view** |
 | 8,000 pre-existing wishes | **Generated** (seeded, same sky for everyone) in a Web Worker on page load — nothing hard-coded. Change `GENERATED_WISHES` in `js/config.js` (5,000–10,000 recommended) |
 | Stars & planets by category | Love = pink-red star · Dreams = gold star · Career = amber-gold star · Health = green planet · Travel = blue ringed planet · Friendship = violet star · Other = white star |
-| Make a wish | Name + wish (**no length limit**) + category → shooting star streaks in, settles in the sky with a burst of sparkles |
+| Make a wish | Wish (**no length limit**) + category — there is no name box; wishes are nameless → shooting star streaks in, settles in the sky with a burst of sparkles |
 | Share | Personal link + code, Share / WhatsApp / Copy |
 | Wishes for a friend | Sealed (only the private link opens it) or public "for Priya". Friend opens the link → camera flies to the pulsing star → card says *"A wish was launched for you by …"* |
 | Private replies | Friend replies with a star; only the original sender can ever see it (bell notification + glowing satellites around the star) |
@@ -47,7 +49,7 @@ but wishes/accounts live only in your own browser (a small notice says so).
    - enable **Email/Password**
    - enable **Google** (pick your email as the support email)
 3. **Build → Firestore Database → Create database** → choose **Production mode** → pick a location near your users (e.g. `asia-south1` Mumbai). *The location can't be changed later.*
-4. Firestore → **Rules** tab → delete everything → paste the entire contents of **`firestore.rules`** → **Publish**.
+4. Firestore → **Rules** tab → delete everything → paste the entire contents of **`firestore.rules`** → **Publish**. *(If you published an older copy, publish this one again — it adds the rule that keeps public wishes anonymous.)*
 5. ⚙️ **Project settings → General → Your apps → `</>` (Web)** → register an app → copy the `firebaseConfig` values.
 6. Open **`js/config.js`** and paste them in:
 
@@ -110,6 +112,7 @@ next day — you are never charged on Spark.
 
 ## Privacy & safety notes
 
+- **Public wishes are anonymous**: the star record holds no name (the rules reject one), search can't find people by name, and only you can locate your own stars. (Test wishes launched on an older version may still have a name stored in Firestore — delete them with the card's Delete button or from the console.)
 - **Sealed wishes** are stored under an unguessable 80-bit code (the link); the public sky only holds a star with no text and no name.
 - **Replies** can be read only by the sender and the receiver (rules enforce it).
 - **Time capsules** are locked by the server clock in the rules, so nobody can read them early — not even by editing the page.
