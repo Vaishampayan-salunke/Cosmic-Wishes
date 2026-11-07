@@ -1,8 +1,0 @@
-{
-  "name": "cosmic-wishes",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "description": "Every wish is a star — static HTML/CSS/JS + Firebase, deployable on Vercel.",
-  "scripts": { "start": "npx serve ." }
-}
