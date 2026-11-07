@@ -70,12 +70,14 @@ a.btn{color:var(--text);text-decoration:none}
 .chip-floating button.x{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.12);font-size:11px}
 
 /* ───────── bottom HUD ───────── */
-#cta{position:fixed;left:50%;bottom:calc(22px + var(--safe-b));transform:translateX(-50%);z-index:20;padding:15px 30px;border-radius:999px;background:var(--grad);color:#1a1230;font-weight:700;font-size:17px;box-shadow:0 8px 40px rgba(255,160,150,.45),inset 0 1px 0 rgba(255,255,255,.55);transition:transform .2s,box-shadow .2s}
+#cta{position:fixed;left:50%;bottom:calc(48px + var(--safe-b));transform:translateX(-50%);z-index:20;padding:15px 30px;border-radius:999px;background:var(--grad);color:#1a1230;font-weight:700;font-size:17px;box-shadow:0 8px 40px rgba(255,160,150,.45),inset 0 1px 0 rgba(255,255,255,.55);transition:transform .2s,box-shadow .2s}
 #cta:hover{transform:translateX(-50%) translateY(-2px);box-shadow:0 12px 50px rgba(255,160,150,.65)}
 #cta:active{transform:translateX(-50%) scale(.97)}
 #counter{position:fixed;left:16px;bottom:calc(26px + var(--safe-b));z-index:15;font-size:13px;color:var(--muted);padding:8px 13px;border-radius:999px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px)}
 #counter b{color:var(--ink);font-weight:600}
 #zoomctl{position:fixed;right:14px;bottom:calc(22px + var(--safe-b));z-index:15;display:flex;flex-direction:column;gap:6px;padding:5px;border-radius:999px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(14px)}
+#credit{position:fixed;left:50%;bottom:calc(4px + var(--safe-b));transform:translateX(-50%);z-index:18;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--glass);backdrop-filter:blur(10px);color:var(--muted);font-size:11px;white-space:nowrap;pointer-events:none}
+#credit span{color:var(--rose);margin:0 2px}
 #tooltip{position:fixed;z-index:25;pointer-events:none;max-width:280px;padding:11px 14px;border-radius:14px;background:rgba(10,13,32,.92);border:1px solid var(--line);backdrop-filter:blur(12px);box-shadow:0 12px 40px rgba(0,0,0,.5);font-size:13px;line-height:1.45}
 #tooltip .tt-name{font-weight:700;margin-bottom:3px;display:flex;gap:6px;align-items:center}
 #tooltip .tt-text{color:#cbd3f3;display:-webkit-box;line-clamp:4;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
