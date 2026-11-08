@@ -9,8 +9,8 @@ export function starInfo(s) {
   const mine = !!(ctx.user && s.ownerUid && s.ownerUid === ctx.user.uid);
   const who = mine ? 'You' : 'Anonymous';
   if (s.gen) {
-    const d = describe(s.i, CAT_KEYS.indexOf(s.cat));
-    return { name: who, text: d.text, preview: d.text, forName: '' };
+    const text = s.text || describe(s.i, CAT_KEYS.indexOf(s.cat)).text;
+    return { name: who, text, preview: text, forName: '' };
   }
   const sealed = s.kind === 'sealed';
   return { name: sealed ? 'A sealed wish' : who, text: null, preview: sealed ? '' : (s.preview || ''), forName: s.forName || '' };

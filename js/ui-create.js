@@ -76,6 +76,7 @@ export function openCreate(prefill = {}) {
     let last = 0; try { last = +localStorage.getItem('cw_last_launch') || 0; } catch { /* ignore */ }
     if (cd && Date.now() - last < cd) return err(`Let the last star settle first — try again in ${Math.ceil((cd - (Date.now() - last)) / 1000)}s.`);
 
+    if (ctx.store.problem) return err(ctx.store.problem.message);
     const user = await requireAuth('to launch your wish');
     if (!user) return;
     const name = (user.name || '').trim() || 'A friend';   // your account name — only ever shown to the friend who opens your private link
@@ -91,7 +92,7 @@ export function openCreate(prefill = {}) {
     } catch (e) {
       console.error(e);
       btn.disabled = false; btn.textContent = '✦ Launch my wish';
-      err(e.code === 'permission-denied' ? 'The sky said no (permissions). Check that the Firestore rules from the README are published.' : (e.message || 'Could not launch — please try again.'));
+      err(e.code === 'permission-denied' ? 'The sky said no (permissions). Publish the Firestore rules from the README (Firestore Database → Rules → Publish), then try again.' : (e.message || 'Could not launch — please try again.'));
     }
   });
   return m;

@@ -78,7 +78,7 @@ function render() {
   meta.push(`<span>🗓 ${esc(fmtDate(star.t))}</span>`);
   if (star.granted) meta.push('<span style="color:#ffd479">✅ Came true</span>');
   if (v.sealed) meta.push('<span>🔒 Sealed</span>');
-  if (star.gen) meta.push('<span>From the early sky</span>');
+  if (star.gen) meta.push(`<span>${star.cur ? 'Among the first wishes' : 'From the early sky'}</span>`);
   if (boost) meta.push(`<span>✨ ${boost} twinkle${boost === 1 ? '' : 's'}</span>`);
 
   const acts = [];

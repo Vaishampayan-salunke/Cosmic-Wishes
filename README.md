@@ -31,7 +31,7 @@ with **Firebase** (free Spark plan) for accounts + database and **Vercel** (free
 
 ---
 
-## 1 · Try it locally (demo mode, 1 minute)
+## 1 · Try it locally (1 minute)
 
 Browsers block ES modules from `file://`, so serve the folder:
 
@@ -39,8 +39,8 @@ Browsers block ES modules from `file://`, so serve the folder:
 cd cosmic-wishes
 npx serve .            # or:  python3 -m http.server 8000
 ```
-Open the printed address. With the Firebase keys empty the site runs in **demo mode**: everything works,
-but wishes/accounts live only in your own browser (a small notice says so).
+Open the printed address. If the Firebase keys in `js/config.js` are empty or wrong, the site shows a **red banner** and refuses to launch wishes — it will never pretend to save them only in your own browser.
+(To play without a backend, open the site with `?demo=1` — wishes then stay in that one browser and are visible to nobody else.)
 
 ## 2 · Create the free Firebase backend (≈10 minutes)
 
@@ -65,7 +65,7 @@ firebase: {
 ```
 (The Firebase web config is not a secret — security comes from the rules you published in step 4.)
 
-Run locally again — the demo notice disappears and "Continue with Google" appears in the sign-in box.
+Reload — the red banner disappears and "Continue with Google" appears in the sign-in box. **Keep this edited `js/config.js` when you upload a new version of the site**, otherwise the keys are lost and the red banner returns.
 
 ## 3 · Deploy to Vercel (free)
 
@@ -88,8 +88,19 @@ Firebase → **Authentication → Settings → Authorized domains → Add domain
 `your-app.vercel.app` (and your custom domain if you have one). Without this, Google sign-in shows
 *"This website address is not authorised"*.
 
+## If the red banner shows
+
+| Banner says | Fix |
+|---|---|
+| "Firebase keys are missing" | Paste the `firebaseConfig` into `js/config.js` (step 2.6) and redeploy. |
+| "Firestore rules are not published" | Firestore → Rules → paste `firestore.rules` → Publish. |
+| "Cannot reach the Firestore database" | Firestore Database → Create database (step 2.3); check `projectId`. |
+
+Wishes launched while the banner is up are **not** saved anywhere. Once it is gone, every wish is stored in Firestore and is visible to everyone.
+
 ## 5 · Quick test after deploying
 
+0. Open your site: **no banner**, counter reads 8,065+ wishes (8,000 generated + 65 hand-written ones from `js/curated.js`).
 1. Open your site → **Make a Wish** → create an account → launch a wish. ✔ the star lands, a link appears.
 2. Launch a **friend** wish (sealed). Open the link in a private window → you should see the message. Sign up there as a second user → **Reply privately**.
 3. Back in your first window the 🔔 shows a badge → Profile → Alerts → the reply is there.
@@ -137,7 +148,7 @@ js/app.js             wires everything together
 js/sky.js             canvas engine (camera, drawing, Sun/Moon/Black hole, effects, time-lapse)
 js/sprites.js         pre-rendered glow / planet / nebula textures (all drawn in code)
 js/wishgen.js         seeded generator for the starter wishes (+ generator.js / generator.worker.js)
-js/store-firebase.js  live data layer       js/store-local.js  demo data layer (same interface)
+js/store-firebase.js  live data layer       js/store-local.js  demo layer (?demo=1 only)   js/store-offline.js  refuses writes when Firebase is broken
 js/ui-*.js            create form, wish card, profile, search, sign-in
 js/audio.js           synthesised ambient sound + chimes
 ```

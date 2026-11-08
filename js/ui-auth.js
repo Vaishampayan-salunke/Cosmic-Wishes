@@ -5,6 +5,7 @@ import { openModal, $, toast } from './ui-core.js';
 
 export function requireAuth(reason = 'to continue') {
   if (ctx.user) return Promise.resolve(ctx.user);
+  if (ctx.store.problem) { toast(ctx.store.problem.message, 'err', 9000); return Promise.resolve(null); }
   return new Promise((resolve) => {
     let done = false, mode = 'signup';
     const google = ctx.store.mode === 'firebase';

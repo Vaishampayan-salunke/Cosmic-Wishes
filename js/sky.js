@@ -64,6 +64,27 @@ export class Sky {
     }
     this.generatedCount = n;
   }
+  // The 65 hand-written public wishes. Deterministic spots so every visitor sees them in the same place.
+  setCurated(list) {
+    const rng = mulberry32(0xC0FFEE);
+    list.forEach((w, i) => {
+      let best = null, bd = -1;
+      for (let k = 0; k < 80; k++) {
+        const p = samplePos(rng, 1700);
+        if (!p.ok) continue;
+        let ok = true;
+        for (const key in BODIES) { const b = BODIES[key]; if (Math.hypot(p.x - b.x, p.y - b.y) < b.excl + 30) ok = false; }
+        if (!ok) continue;
+        const d = this.nearestStar(p.x, p.y);
+        if (d > bd) { bd = d; best = p; }
+        if (d > 60) break;
+      }
+      best = best || { x: 650 + rng() * 400, y: 650 + rng() * 400 };
+      const t = Date.UTC(2026, 8, 1) + Math.floor(i * 24 * 3600e3 * 0.4);
+      this.addStar({ id: 'c' + i, gen: true, cur: true, text: w.text, x: best.x, y: best.y, cat: w.cat, size: 1.25 + rng() * 0.5, t, seed: (Math.imul(i + 7, 2654435761)) >>> 0 });
+    });
+    this.curatedCount = list.length;
+  }
   addStar(s) {
     const idx = this.stars.length;
     this.stars.push(s); this.byId.set(s.id, s);

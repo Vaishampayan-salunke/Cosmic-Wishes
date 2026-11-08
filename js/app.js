@@ -8,6 +8,7 @@ import { generateInBackground } from './generator.js';
 import { CATS, esc, hashStr, mulberry32, fmtDate } from './util.js';
 import { BODIES } from './world.js';
 import { starInfo } from './info.js';
+import { CURATED } from './curated.js';
 import { $, toast, openModal, closeAllModals, topModal } from './ui-core.js';
 import { requireAuth } from './ui-auth.js';
 import { openCreate, openSuccess } from './ui-create.js';
@@ -53,14 +54,14 @@ async function boot() {
 
   initCard(); initSearch(); wireHud();
 
-  // demo-mode notice
-  if (ctx.store.mode === 'local') {
-    const b = $('#demo-badge');
-    b.textContent = ctx.store.fallbackReason
-      ? `Firebase could not load (${ctx.store.fallbackReason}) — running in demo mode. Tap to hide.`
-      : 'Demo mode — wishes are saved only in this browser. Add your Firebase keys in js/config.js to go live. (tap to hide)';
-    b.hidden = false; b.addEventListener('click', () => { b.hidden = true; });
-  }
+  // Setup problem banner: only appears when Firebase is missing or broken (never in normal use).
+  const showProblem = (pr) => {
+    const b = $('#setup-banner'); if (!pr) { b.hidden = true; return; }
+    b.innerHTML = `<b>Wishes can't be saved right now.</b> ${esc(pr.message)} <button type="button" class="x" aria-label="Hide">✕</button>`;
+    b.hidden = false; b.querySelector('.x').onclick = () => { b.hidden = true; };
+  };
+  if (ctx.store.problem) showProblem(ctx.store.problem);
+  window.addEventListener('cw-problem', (e) => showProblem(e.detail));
 
   // live data
   ctx.store.subscribeStars((items) => { sky.upsertMany(items); scheduleCounter(); });
@@ -78,8 +79,9 @@ async function boot() {
   // the pre-existing sky (generated in a worker, never hard-coded)
   generateInBackground(CONFIG.GENERATED_WISHES).then((arr) => {
     sky.setGenerated(arr);
+    sky.setCurated(CURATED);
     $('#loading-line').classList.add('done');
-    $('#landing-count').textContent = arr.count.toLocaleString();
+    $('#landing-count').textContent = (arr.count + CURATED.length).toLocaleString();
     computeWotd(); scheduleCounter(); genResolve();
   });
 

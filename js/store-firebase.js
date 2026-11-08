@@ -32,6 +32,9 @@ const FRIENDLY = {
 };
 const wrapAuth = (e) => Object.assign(new Error(FRIENDLY[e.code] || e.message || 'Something went wrong.'), { code: e.code });
 const err = (code, message) => Object.assign(new Error(message || code), { code });
+// A Firestore write that cannot reach the server never fails — it just waits. Never let the UI wait forever.
+const withTimeout = (p, ms, message) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(err('timeout', message)), ms))]);
+const SAVE_FAIL = 'Your wish could not be saved to the sky. Check that the Firestore database is created and the rules are published (see the README), then try again.';
 
 export default async function createFirebaseStore(cfg) {
   const app = initializeApp(cfg.firebase);
@@ -134,12 +137,24 @@ export default async function createFirebaseStore(cfg) {
       } else {
         batch.set(doc(db, 'texts', id), { ownerUid: u.uid, text: d.text });
       }
-      await batch.commit();
+      await withTimeout(batch.commit(), 15000, SAVE_FAIL);
       const now = Date.now();
       return {
         code,
         star: { id, ownerUid: u.uid, name: '', forName: sealed ? '' : (d.forName || ''), cat: d.cat, x: d.x, y: d.y, size: d.size, kind, preview: sealed ? '' : d.text.slice(0, 140), unlockAt: d.unlockAt || null, granted: false, removed: false, createdAt: now, updatedAt: now },
       };
+    },
+    // Quick end-to-end check that the database is reachable and the rules are published.
+    async health() {
+      try {
+        await withTimeout(getDoc(doc(db, 'stars', '_health')), 9000, 'timeout');
+        return { ok: true };
+      } catch (e) {
+        const c = e.code || '';
+        if (c === 'permission-denied') return { ok: false, code: c, message: 'Firestore rules are not published. Paste firestore.rules into Firebase → Firestore Database → Rules → Publish.' };
+        if (c === 'timeout' || c === 'unavailable' || c === 'failed-precondition' || c === 'not-found') return { ok: false, code: c, message: 'Cannot reach the Firestore database. Create it in Firebase → Build → Firestore Database → Create database, and make sure the projectId in config is right.' };
+        return { ok: false, code: c, message: e.message || 'Firebase check failed.' };
+      }
     },
     async getStar(id) { const s = await getDoc(doc(db, 'stars', id)); return s.exists() ? stubOf(s.id, dd(s)) : null; },
     async getText(id) { const s = await getDoc(doc(db, 'texts', id)); return s.exists() ? dd(s).text : null; },

@@ -1,7 +1,8 @@
 // ─────────────────────────────────────────────────────────────
 //  CONFIG — the only file you need to edit before deploying.
-//  Leave the firebase values empty to run in DEMO MODE
-//  (wishes are then saved only inside each visitor's own browser).
+//  Paste your Firebase web config below. If it is empty or wrong, the
+//  site shows a red banner and refuses to launch wishes (it never
+//  silently saves them only in one browser).
 // ─────────────────────────────────────────────────────────────
 export const CONFIG = {
   APP_NAME: 'Cosmic Wishes',
@@ -10,15 +11,16 @@ export const CONFIG = {
   // How many pre-existing wishes are generated (seeded, never hard-coded). 5000–10000 recommended.
   GENERATED_WISHES: 8000,
 
-  // Paste your Firebase web-app config here (Firebase console → Project settings → Your apps → Web app).
-  firebase: {
-    apiKey: '',
-    authDomain: '',
-    projectId: '',
-    storageBucket: '',
-    messagingSenderId: '',
-    appId: '',
+  // Your web app's Firebase configuration
+  firebase : {
+    apiKey: "AIzaSyDrPGN9Ig2NG3WP0IesbDLn1ers_a7UWpc",
+    authDomain: "cosmic-wishes.firebaseapp.com",
+    projectId: "cosmic-wishes",
+    storageBucket: "cosmic-wishes.firebasestorage.app",
+    messagingSenderId: "200141112947",
+    appId: "1:200141112947:web:c5739807e0d1730f5a0c06"
   },
+
 
   // Anti-spam: seconds a visitor must wait between launching wishes (client-side only).
   POST_COOLDOWN_SECONDS: 20,
